@@ -25,7 +25,9 @@ const fail = (msg, status = 400) => { throw new HttpError(status, msg); };
 // "STAFF:1234567890;A1:12345678;B2:87654321"
 function envCodes() {
   const out = new Map();
-  for (const part of String(process.env.MDS_CODES || '').split(/[;,\s]+/)) {
+  // מתעלם ממרכאות ורווחים שנכנסו בהדבקה
+  const raw = String(process.env.MDS_CODES || '').replace(/["'״׳]/g, '');
+  for (const part of raw.split(/[;,\s]+/)) {
     const [who, code] = part.split(':').map(s => s && s.trim());
     if (!who || !code) continue;
     if (who.toUpperCase() === 'STAFF') out.set(code, { role: 'staff' });
@@ -39,6 +41,7 @@ async function resolve(store, code) {
   code = String(code || '').trim();
   if (!code) fail('נא להזין קוד', 401);
   const env = envCodes();
+  if (!env.size) fail('הקודים לא הוגדרו בשרת: חסר המשתנה MDS_CODES ב-Netlify (או שלא בוצעה פריסה מחדש אחריו)', 503);
   if (env.has(code)) return env.get(code);
   const idx = await read(store, 'trainee-codes', {});
   if (idx[code]) return { role: 'trainee', ...idx[code] };
