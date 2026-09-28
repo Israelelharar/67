@@ -258,3 +258,8 @@ tr.dim td { opacity: .6; }
   .edit-table td.code::before { content: 'קוד: '; font-weight: 400; letter-spacing: 0; color: var(--muted); }
   .edit-table .row-actions { justify-content: flex-end; }
 }
+
+.slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.slot { display: flex; flex-direction: column; gap: 4px; padding: 10px; border: 1px dashed var(--line); border-radius: 10px; font-size: 13px; color: var(--muted); }
+.slot b { font-size: 15px; color: var(--ink); }
+.slot.set { border-style: solid; border-color: var(--brand); background: var(--now-bg); color: var(--brand-dark); }

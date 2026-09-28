@@ -80,15 +80,16 @@ function scopeOf(auth, body) {
 
 function validWorkout(w) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(w.date || '')) fail('תאריך לא תקין');
+  const slot = Number(w.slot);
+  if (![1, 2, 3].includes(slot)) fail('נא לבחור מד"ס 1, 2 או 3');
   const title = clean(w.title, 80);
-  if (!title) fail('חסר שם לאימון');
   if (w.level && !LEVELS.includes(w.level)) fail('רמה לא תקינה');
   const exercises = (w.exercises || [])
     .map(x => ({ name: clean(x.name, 60), unit: x.unit, target: clean(x.target, 40) }))
     .filter(x => x.name);
   if (!exercises.length) fail('צריך לפחות תרגיל אחד');
   if (exercises.some(x => !UNITS.includes(x.unit))) fail('יחידה לא תקינה');
-  return { date: w.date, title, level: w.level || '', exercises, notes: clean(w.notes, 300) };
+  return { date: w.date, slot, title, level: w.level || '', exercises, notes: clean(w.notes, 300) };
 }
 
 const actions = {

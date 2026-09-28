@@ -2,6 +2,7 @@
   const SQUADS = { 'א': 12, 'ב': 2 };
   const LEVELS = { 'א': 'טובים', 'ב': 'בינוניים', 'ג': 'מתקשים' };
   const STATUSES = ['פעיל', 'פצוע', 'פטור', 'עזב'];
+  const PER_WEEK = 3; // מד"סים בשבוע
   const COUNTED = new Set(['פעיל', 'פצוע']); // סטטוסים שנכללים בממוצעי הקבוצה
   const CODE_KEY = 'mds.code';
   const UNITS = {
@@ -48,6 +49,7 @@
   const pct = x => (x == null ? '—' : `${Math.round(x * 100)}%`);
   const squadLabel = s => `שנה ${s.year} · קבוצה ${s.squad}`;
   const lvlBadge = lvl => `<span class="lvl lvl-${esc(lvl)}" title="${esc(LEVELS[lvl] || '')}">${esc(lvl)}</span>`;
+  const wName = w => `מד"ס ${w.slot || ''}`.trim() + (w.title ? ` · ${w.title}` : '');
   const statusChip = st => (st && st !== 'פעיל' ? `<span class="chip st-${esc(st)}">${esc(st)}</span>` : '');
   const weekDots = (done, total) => total
     ? `<span class="week-dots" title="${done} מתוך ${total}">${Array.from({ length: total }, (_, i) => `<i class="${i < done ? 'on' : ''}"></i>`).join('')}</span>`
@@ -121,11 +123,11 @@
     const due = all.filter(w => w.date <= today() && w.date >= weekStart(joined));
     const wk = weekStart(today());
     const weekAll = all.filter(w => weekStart(w.date) === wk);
+    const weekDone = Math.min(PER_WEEK, weekAll.filter(w => doneIds.has(w.id)).length);
     const doneDue = due.filter(w => doneIds.has(w.id)).length;
     return {
       total: L.length,
-      weekDone: weekAll.filter(w => doneIds.has(w.id)).length,
-      weekTotal: weekAll.length,
+      weekDone, weekTotal: PER_WEEK, weekDefined: weekAll.length,
       due: due.length, doneDue,
       rate: due.length ? doneDue / due.length : null,
       missed: due.filter(w => !doneIds.has(w.id) && w.date >= addDays(today(), -7)).length,
@@ -230,7 +232,7 @@
       .sort((a, b) => a.date.localeCompare(b.date));
     return `
       <div class="stats">
-        <div class="stat"><div class="v">${s.weekDone}/${s.weekTotal || '—'}</div><div class="l">מד"ס השבוע ${weekDots(s.weekDone, s.weekTotal)}</div></div>
+        <div class="stat"><div class="v">${s.weekDone}/${PER_WEEK}</div><div class="l">מד"סים השבוע ${weekDots(s.weekDone, s.weekTotal)}</div></div>
         <div class="stat"><div class="v">${pct(s.rate)}</div><div class="l">אחוז השלמה</div></div>
         <div class="stat"><div class="v">${s.total}</div><div class="l">אימונים שתועדו</div></div>
       </div>
@@ -266,7 +268,7 @@
     return `
       <section class="card workout ${kind}">
         <div class="w-head">
-          <div><div class="w-date">יום ${dayName(w.date)} · ${fmtDate(w.date)}</div><h2>${esc(w.title)}</h2></div>
+          <div><div class="w-date">יום ${dayName(w.date)} · ${fmtDate(w.date)}</div><h2>${esc(wName(w))}</h2></div>
           ${chip}
         </div>
         ${w.notes ? `<p class="w-notes">${esc(w.notes)}</p>` : ''}
@@ -289,7 +291,7 @@
         <div class="muted">${esc(squadLabel(isMe ? state.auth : state.sel))} · רמה ${esc(t.level)} (${esc(LEVELS[t.level] || '')})</div>
       </section>
       <div class="stats">
-        <div class="stat"><div class="v">${s.weekDone}/${s.weekTotal || '—'}</div><div class="l">השבוע ${weekDots(s.weekDone, s.weekTotal)}</div></div>
+        <div class="stat"><div class="v">${s.weekDone}/${PER_WEEK}</div><div class="l">מד"סים השבוע ${weekDots(s.weekDone, s.weekTotal)}</div></div>
         <div class="stat"><div class="v">${pct(s.rate)}</div><div class="l">אחוז השלמה (${s.doneDue}/${s.due})</div></div>
         <div class="stat"><div class="v">${s.total}</div><div class="l">אימונים שתועדו</div></div>
       </div>
@@ -378,20 +380,35 @@
       </section>`;
   }
 
-  const blankWorkout = () => ({ date: today(), title: '', level: '', notes: '', target: 'squad', exercises: [{ name: '', unit: 'reps', target: '' }] });
+  const blankWorkout = () => ({ date: today(), slot: '', title: '', level: '', notes: '', target: 'squad', exercises: [{ name: '', unit: 'reps', target: '' }] });
 
   function workoutsView() {
     const doc = cur();
-    const w = state.form ||= blankWorkout();
+    if (!state.form) {
+      const wk0 = weekStart(today());
+      const used = new Set(doc.workouts.filter(x => weekStart(x.date) === wk0).map(x => Number(x.slot)));
+      state.form = { ...blankWorkout(), slot: [1, 2, 3].find(n => !used.has(n)) || '' };
+    }
+    const w = state.form;
     const shown = [...doc.workouts].sort((a, b) => b.date.localeCompare(a.date)).filter(x => x.date >= addDays(today(), -28));
     const counted = doc.trainees.filter(t => COUNTED.has(t.status));
+    const wk = weekStart(today());
+    const thisWeek = doc.workouts.filter(x => weekStart(x.date) === wk);
     return `
+      <section class="card">
+        <h2>השבוע</h2><p class="muted small">ראשון ${fmtDate(wk)} עד שבת ${fmtDate(addDays(wk, 6))}</p>
+        <div class="slots">${[1, 2, 3].map(n => {
+          const ws = thisWeek.filter(x => Number(x.slot) === n);
+          return `<div class="slot ${ws.length ? 'set' : ''}"><b>מד"ס ${n}</b><span>${ws.length ? ws.map(x => `יום ${dayName(x.date)}${x.level ? ` · רמה ${esc(x.level)}` : ''}`).join('<br>') : 'עוד לא הוגדר'}</span></div>`;
+        }).join('')}</div>
+      </section>
       <section class="card">
         <h2>מד"ס חדש</h2>
         <form id="wForm">
           <div class="grid">
             <label>תאריך<input type="date" id="wDate" value="${esc(w.date)}" required></label>
-            <label>שם האימון<input id="wTitle" value="${esc(w.title)}" placeholder='מד"ס פלג גוף עליון'></label>
+            <label>איזה מד"ס בשבוע<select id="wSlot">${['', 1, 2, 3].map(n => `<option value="${n}" ${String(w.slot) === String(n) ? 'selected' : ''}>${n ? `מד"ס ${n} מתוך 3` : 'בחרו…'}</option>`).join('')}</select></label>
+            <label>נושא (לא חובה)<input id="wTitle" value="${esc(w.title)}" placeholder="פלג גוף עליון"></label>
             <label>לאיזו רמה<select id="wLevel">${levelOptions(w.level, 'כל הרמות')}</select></label>
             ${isStaff() ? `<label>לאילו קבוצות<select id="wTarget">
               <option value="squad" ${w.target === 'squad' ? 'selected' : ''}>רק ${esc(squadLabel(state.sel))}</option>
@@ -421,7 +438,7 @@
           <tbody>${shown.map(x => {
             const target = counted.filter(t => forTrainee(x, t));
             const done = new Set(doc.logs.filter(l => l.workoutId === x.id).map(l => l.traineeId)).size;
-            return `<tr><td>${dayName(x.date)} ${fmtDate(x.date)}</td><td><strong>${esc(x.title)}</strong></td><td>${x.level ? lvlBadge(x.level) : '<span class="muted">כולם</span>'}</td>
+            return `<tr><td>${dayName(x.date)} ${fmtDate(x.date)}</td><td><strong>${esc(wName(x))}</strong></td><td>${x.level ? lvlBadge(x.level) : '<span class="muted">כולם</span>'}</td>
               <td class="wrap">${x.exercises.map(e => esc(e.name)).join(', ')}</td>
               <td>${x.date > today() ? '<span class="muted">—</span>' : `${done}/${target.length}`}</td>
               <td class="row-actions"><button class="btn ghost" data-dup="${esc(x.id)}">שכפול</button><button class="btn danger" data-wdel="${esc(x.id)}">מחיקה</button></td></tr>`;
@@ -622,7 +639,7 @@
     if ($('#wForm')) {
       const f = state.form;
       const sync = () => {
-        f.date = $('#wDate').value; f.title = $('#wTitle').value; f.level = $('#wLevel').value; f.notes = $('#wNotes').value;
+        f.date = $('#wDate').value; f.slot = $('#wSlot').value; f.title = $('#wTitle').value; f.level = $('#wLevel').value; f.notes = $('#wNotes').value;
         if ($('#wTarget')) f.target = $('#wTarget').value;
         $$('[data-exf]').forEach(el => { f.exercises[el.dataset.i][el.dataset.exf] = el.value; });
       };
@@ -636,11 +653,11 @@
         sync();
         busy(e.target.querySelector('[type=submit]'), async () => {
           const exercises = f.exercises.map(x => ({ ...x, name: x.name.trim(), target: x.target.trim() })).filter(x => x.name);
-          if (!f.title.trim()) throw new Error('נא לתת שם לאימון');
+          if (!f.slot) throw new Error('נא לבחור איזה מד"ס זה (1, 2 או 3)');
           if (!exercises.length) throw new Error('נא להוסיף לפחות תרגיל אחד');
-          const { created } = await api('addWorkout', { ...scope(), target: f.target, workout: { date: f.date, title: f.title.trim(), level: f.level, notes: f.notes, exercises } });
+          const { created } = await api('addWorkout', { ...scope(), target: f.target, workout: { date: f.date, slot: Number(f.slot), title: f.title.trim(), level: f.level, notes: f.notes, exercises } });
           await refresh();
-          state.form = { ...blankWorkout(), date: f.date, target: f.target };
+          state.form = null; // הטופס הבא יבחר לבד את המד"ס הפנוי הבא
           toast(created.length > 1 ? `האימון פורסם ל-${created.length} קבוצות` : 'האימון פורסם לחניכים');
           render();
         });
@@ -648,7 +665,7 @@
     }
     $$('[data-dup]').forEach(b => b.onclick = () => {
       const w = cur().workouts.find(x => x.id === b.dataset.dup);
-      state.form = { date: today(), title: w.title, level: w.level, notes: w.notes || '', target: 'squad', exercises: w.exercises.map(x => ({ ...x })) };
+      state.form = { date: today(), slot: w.slot || '', title: w.title, level: w.level, notes: w.notes || '', target: 'squad', exercises: w.exercises.map(x => ({ ...x })) };
       render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
       toast('האימון הועתק לטופס. בחרו תאריך ופרסמו');
