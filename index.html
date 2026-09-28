@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>מעקב מד"ס — מכינת יפו</title>
+  <link rel="icon" href="assets/logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <img src="assets/logo.jpg" alt="מכינת יפו" class="logo">
+    <div class="brand">
+      <h1>מעקב מד"ס</h1>
+      <span>מכינת יפו · לרדת למעלה</span>
+    </div>
+    <div class="me" id="me"></div>
+  </header>
+
+  <div class="demo-banner" id="demoBanner" hidden>
+    מצב הדגמה — הנתונים מדומים ונשמרים רק בדפדפן הזה. להפעלה אמיתית ראו README.
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button data-view="log" class="active">תיעוד אימון</button>
+    <button data-view="progress">ההתקדמות שלי</button>
+    <button data-view="squad">אחראי קבוצה</button>
+    <button data-view="overview">סקירה כללית</button>
+  </nav>
+
+  <main id="main">
+    <div class="loading">טוען נתונים…</div>
+  </main>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
