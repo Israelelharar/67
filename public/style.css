@@ -39,6 +39,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 
 body {
   margin: 0;
@@ -61,14 +62,6 @@ body {
 .brand span { font-size: 13px; color: var(--brand); font-weight: 500; }
 .me { margin-inline-start: auto; font-size: 14px; text-align: left; }
 .me button { margin-top: 2px; }
-
-.demo-banner {
-  background: var(--banner-bg);
-  color: var(--banner-ink);
-  padding: 8px 16px;
-  font-size: 14px;
-  text-align: center;
-}
 
 .tabs {
   display: flex;
@@ -242,4 +235,26 @@ tr.sel td { background: var(--now-bg); }
   .ex-edit-row input[data-exf="target"] { grid-column: 1 / -1; grid-row: 3; }
   .ex-edit-row select { grid-column: 1; }
   .me { font-size: 13px; }
+}
+
+/* ---------- ניהול ---------- */
+.squad-picker { display: flex; gap: 8px; margin-bottom: 16px; }
+.squad-picker select { width: auto; font-weight: 700; }
+.chip.st-פצוע { background: var(--warn-bg); color: var(--mid); }
+.chip.st-פטור, .chip.st-עזב { background: var(--bg); color: var(--muted); }
+tr.dim td { opacity: .6; }
+.edit-table td { padding: 6px; }
+.edit-table input, .edit-table select { padding: 6px 8px; width: auto; }
+.edit-table .name-in { min-width: 140px; }
+
+@media (max-width: 600px) {
+  .edit-table thead { display: none; }
+  .edit-table, .edit-table tbody, .edit-table td { display: block; }
+  .edit-table tr { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .edit-table td { border: 0; padding: 0; white-space: normal; }
+  .edit-table td:first-child { grid-column: 1 / -1; }
+  .edit-table .name-in, .edit-table select { width: 100%; }
+  .edit-table td.code { align-self: center; }
+  .edit-table td.code::before { content: 'קוד: '; font-weight: 400; letter-spacing: 0; color: var(--muted); }
+  .edit-table .row-actions { justify-content: flex-end; }
 }
