@@ -16,6 +16,9 @@
   --banner-ink: #7a5a00;
   --toast-bg: #1f3340;
   --toast-ink: #ffffff;
+  --ok-bg: #e3f4ea;
+  --warn-bg: #fdecec;
+  --now-bg: #e1f1f4;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,6 +27,7 @@
     --brand: #3bb0c4; --brand-dark: #6cc8d8; --ink: #e3ecef; --muted: #93a6ae;
     --bg: #0f1a1f; --card: #16242a; --line: #26383f; --field: #0f1a1f; --hover: #1c2f36;
     --banner-bg: #3a2f10; --banner-ink: #f1d58a; --toast-bg: #e3ecef; --toast-ink: #0f1a1f;
+    --ok-bg: #173a27; --warn-bg: #43201f; --now-bg: #173640;
   }
 }
 :root[data-theme="dark"] {
@@ -31,6 +35,7 @@
   --brand: #3bb0c4; --brand-dark: #6cc8d8; --ink: #e3ecef; --muted: #93a6ae;
   --bg: #0f1a1f; --card: #16242a; --line: #26383f; --field: #0f1a1f; --hover: #1c2f36;
   --banner-bg: #3a2f10; --banner-ink: #f1d58a; --toast-bg: #e3ecef; --toast-ink: #0f1a1f;
+  --ok-bg: #173a27; --warn-bg: #43201f; --now-bg: #173640;
 }
 
 * { box-sizing: border-box; }
@@ -131,7 +136,7 @@ button:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
 .btn.danger { background: none; color: var(--weak); padding: 4px 8px; font-weight: 500; }
 .actions { display: flex; gap: 8px; margin-top: 16px; align-items: center; flex-wrap: wrap; }
 
-.stats { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin-bottom: 16px; }
+.stats { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); margin-bottom: 16px; }
 .stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
 .stat .v { font-size: 26px; font-weight: 800; }
 .stat .l { font-size: 13px; color: var(--muted); }
@@ -180,4 +185,61 @@ tr.clickable:hover { background: var(--hover); }
   .brand h1 { font-size: 17px; }
   .logo { width: 40px; height: 40px; }
   .stat .v { font-size: 22px; }
+}
+
+/* ---------- תפקידים וקודים ---------- */
+.me { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.me-actions { display: flex; gap: 10px; }
+.role-chip { font-size: 12px; font-weight: 700; color: var(--brand-dark); background: var(--now-bg); padding: 2px 8px; border-radius: 99px; }
+.gate { max-width: 440px; margin-inline: auto; }
+.code-row { display: flex; gap: 8px; }
+.code-row input { font-size: 20px; letter-spacing: .2em; text-align: center; font-variant-numeric: tabular-nums; }
+.hint { font-size: 13px; color: var(--muted); background: var(--bg); padding: 8px 10px; border-radius: 8px; }
+.code { font-variant-numeric: tabular-nums; letter-spacing: .12em; font-weight: 700; }
+
+/* ---------- כרטיס אימון ---------- */
+.w-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.w-head h2 { margin: 2px 0 0; }
+.w-head select { width: auto; }
+.w-date { font-size: 13px; color: var(--muted); font-weight: 500; }
+.w-notes { margin: 8px 0 0; padding: 8px 10px; background: var(--bg); border-radius: 8px; font-size: 14px; }
+.workout.today { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); }
+.workout.open { border-color: var(--weak); }
+.chip { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: var(--bg); color: var(--muted); white-space: nowrap; }
+.chip.ok { background: var(--ok-bg); color: var(--good); }
+.chip.warn { background: var(--warn-bg); color: var(--weak); }
+.chip.now { background: var(--now-bg); color: var(--brand-dark); }
+.results { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
+.results li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.results li:last-child { border-bottom: 0; }
+.results b { font-variant-numeric: tabular-nums; }
+.result-form { display: grid; gap: 12px; margin-top: 12px; }
+.ex-row { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.ex-name { display: flex; flex-direction: column; font-size: 15px; font-weight: 700; }
+.ex-name small { font-weight: 400; color: var(--muted); font-size: 13px; }
+.ex-input { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.ex-input input { width: 96px; text-align: center; font-size: 18px; font-variant-numeric: tabular-nums; }
+.unit { font-size: 13px; color: var(--muted); min-width: 36px; }
+
+/* ---------- צוות ---------- */
+.subtabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.subtabs button { font: inherit; font-weight: 500; border: 1px solid var(--line); background: var(--card); color: var(--muted); padding: 8px 14px; border-radius: 99px; cursor: pointer; }
+.subtabs button.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+.ex-edit { display: grid; gap: 8px; margin-bottom: 10px; }
+.ex-edit-row { display: grid; grid-template-columns: 2fr 1.2fr 2fr auto; gap: 8px; align-items: center; }
+.spaced { margin-top: 16px; }
+.inline { flex-direction: row; align-items: center; gap: 8px; font-weight: 400; color: var(--muted); }
+.row-actions { display: flex; gap: 4px; }
+td.wrap { white-space: normal; min-width: 220px; }
+tr.sel td { background: var(--now-bg); }
+.small { font-size: 13px; }
+.warn-text { color: var(--weak); }
+.actions.top { margin: 0 0 12px; }
+
+@media (max-width: 600px) {
+  .ex-edit-row { grid-template-columns: 1fr auto; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .ex-edit-row input[data-exf="name"] { grid-column: 1 / -1; }
+  .ex-edit-row input[data-exf="target"] { grid-column: 1 / -1; grid-row: 3; }
+  .ex-edit-row select { grid-column: 1; }
+  .me { font-size: 13px; }
 }
