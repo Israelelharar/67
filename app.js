@@ -436,7 +436,8 @@
     };
 
     document.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
-      if (!confirm('למחוק את האימון?')) return;
+      // לחיצה ראשונה מבקשת אישור, השנייה מוחקת
+      if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'לאשר מחיקה?'; return; }
       try {
         await api.post({ action: 'deleteLog', id: b.dataset.del, traineeId: me().id });
         state.logs = state.logs.filter(l => l.id !== b.dataset.del);
@@ -477,7 +478,12 @@
   // ---------- טעינה ----------
   (async () => {
     $('#demoBanner').hidden = !DEMO;
-    if (window.Chart) { Chart.defaults.font.family = 'Heebo, sans-serif'; }
+    if (window.Chart) {
+      const css = getComputedStyle(document.documentElement);
+      Chart.defaults.font.family = 'Heebo, sans-serif';
+      Chart.defaults.color = css.getPropertyValue('--muted').trim() || '#6b7c86';
+      Chart.defaults.borderColor = css.getPropertyValue('--line').trim() || '#e1e8eb';
+    }
     try {
       const data = await api.load();
       state.trainees = data.trainees.map(t => ({ ...t, squad: Number(t.squad) }));
